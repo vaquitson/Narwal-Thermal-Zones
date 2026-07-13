@@ -2,6 +2,7 @@
 #define NARWAL_THERMAL_ZONE_H
 
 #include <dirent.h>
+#include <stddef.h>
 #include "narwal_thermal_zones_config.h"
 
 typedef struct  {
