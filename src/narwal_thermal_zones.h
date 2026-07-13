@@ -15,5 +15,6 @@ typedef struct  {
 
 int narwal_thermal_zones_get_next(DIR *dp, NarwalThermalZone *tzp);
 char *narwal_thermal_zones_get_type(NarwalThermalZone *tz_p);
+float narwal_thermal_zones_get_temp(NarwalThermalZone *tz_p);
 
 #endif

@@ -4,11 +4,12 @@
 #include <string.h>
 #include "narwal_thermal_zones.h"
 
-int print_all_thermal_zones_types()
+int print_thermal_zones_info()
 {
   NarwalThermalZone tz_p = {0};
   DIR *dp;
   char *type;
+  float temp;
 
   if ((dp = opendir("/sys/class/thermal/")) == NULL){
     printf("Error\n");
@@ -21,15 +22,20 @@ int print_all_thermal_zones_types()
       printf("error: %s\n", strerror(tz_p.error));
       return -1;
     }
+
+    temp = narwal_thermal_zones_get_temp(&tz_p); 
     printf("path: %s\n", tz_p.path);
     printf("type: %s\n", type);
+    printf("temp: %f\n", temp);
+    printf("\n");
   }
   return 0;
 }
   //narwal_thermal_zones_get_next(dp, &tz_p); 
 
 
+
 int main(void){
-  print_all_thermal_zones_types();
+  print_thermal_zones_info();
   return 0;
 }
