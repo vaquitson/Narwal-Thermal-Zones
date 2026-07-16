@@ -8,7 +8,7 @@
 #include <errno.h>
 #include "narwal_thermal_zones.h"
 
-
+DIR *d_p = NULL;
 
 /*
  * Returns the length of a null-terminated string, up to a specified limit.
@@ -63,7 +63,7 @@ size_t priv_narwal_thermal_zones_strip_line_jump(char *ptr, char replacement)
 }
 
 /*
- * Retrieves the next thermal zone available on the system.
+ * * Retrieves the next thermal zone available on the system.
  *
  * On each successful call, this function clears the structure pointed to by
  * `tz_p` and fills it with information about the next available thermal zone.
@@ -74,23 +74,27 @@ size_t priv_narwal_thermal_zones_strip_line_jump(char *ptr, char replacement)
  *
  * @return A status code indicating whether a thermal zone was retrieved,
  *         whether the iteration has finished, or whether an error occurred.
+ *
+ * options
+ * opts = 1: rewind the directory. This could be usefule when serching for a 
+ *    specific thermal zone
+ *
 */
-int narwal_thermal_zones_get_next(NarwalThermalZone *tz_p)
-{
-  static DIR *d_p = NULL;
 
+int priv_narwal_thermal_zones_get_next(NarwalThermalZone *tz_p, unsigned int opts)
+{
   struct dirent *dir_p = NULL;
   size_t path_len = 0;
-
-  memset(tz_p, 0, sizeof(NarwalThermalZone));
 
   if (d_p == NULL){
     d_p = opendir(NARWAL_THERMAL_ZONE_THERMAL_DIR);
     if (d_p == NULL){
-      tz_p->error = errno; 
-      return errno;
+      tz_p->error = NARWAL_THERMAL_ZONE_INVALID_PATH;
+      return NARWAL_THERMAL_ZONE_ERR;
     }
   }
+
+  memset(tz_p, 0, sizeof(NarwalThermalZone));
 
   strncpy(tz_p->path, NARWAL_THERMAL_ZONE_THERMAL_DIR, NARWAL_THERMAL_ZONE_PATH_MAX);
   path_len = strlen(NARWAL_THERMAL_ZONE_THERMAL_DIR);
@@ -102,14 +106,13 @@ int narwal_thermal_zones_get_next(NarwalThermalZone *tz_p)
       path_len += priv_narwal_thermal_zones_strnlen(dir_p->d_name, NARWAL_THERMAL_ZONE_PATH_MAX);
 
       tz_p->path_len = path_len;
-      return 0;
+      return NARWAL_THERMAL_ZONE_SUCESS;
     }
   }
 
   rewinddir(d_p);
-  d_p = NULL;
 
-  return 1;
+  return NARWAL_THERMAL_ZONE_NO_MORE_TZ;
 }
 
 
@@ -129,11 +132,12 @@ char *narwal_thermal_zones_get_type(NarwalThermalZone *tz_p)
       return NULL;
     }
 
-    read_s = read(fd, tz_p->type, NARWAL_THERMAL_ZONE_TYPE_MAX); 
-    if (read_s < 0){
+    read_s = read(fd, tz_p->type, NARWAL_THERMAL_ZONE_TYPE_MAX - 1);
+    if (read_s <= 0){
       tz_p->error = errno;
       return NULL;
     }
+
     tz_p->type[read_s] = '\0';
     priv_narwal_thermal_zones_strip_line_jump(tz_p->type, '\0');
     tz_p->type_len = read_s - 1;
@@ -162,14 +166,43 @@ float narwal_thermal_zones_get_temp(NarwalThermalZone *tz_p)
     return errno;
   }
 
-  read_s = read(fd, temp_str, NARWAL_THERMAL_ZONE_TEMP_MAX); 
+  read_s = read(fd, temp_str, NARWAL_THERMAL_ZONE_TEMP_MAX - 1); 
   if (read_s < 0){
     tz_p->error = errno;
     return errno;
   }
-  tz_p->type[read_s] = '\0';
+  temp_str[read_s] = '\0';
   long_temp = strtol(temp_str, NULL, 10);
 
   close(fd);
   return long_temp/1000.0;
+}
+
+
+/*
+ * Get a specific thermal zone identified by type
+*/
+int narwal_thermal_zones_get_by_type(NarwalThermalZone *tz_p, const char *type_p){
+  int rc;
+  char *type_rs;
+
+  if (d_p != NULL){
+    rewinddir(d_p);
+  }
+  
+  while ((rc = priv_narwal_thermal_zones_get_next(tz_p, 0)) == NARWAL_THERMAL_ZONE_SUCESS){
+    type_rs = narwal_thermal_zones_get_type(tz_p);
+
+    if (type_rs ==  NULL)
+      return NARWAL_THERMAL_ZONE_ERR;
+
+    if (strncmp(type_rs, type_p, NARWAL_THERMAL_ZONE_TYPE_MAX) == 0)
+      return NARWAL_THERMAL_ZONE_SUCESS;
+  }
+
+  if (rc < 0){
+    return NARWAL_THERMAL_ZONE_ERR; 
+  } else {
+    return rc;
+  }
 }
