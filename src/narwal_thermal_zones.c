@@ -81,7 +81,7 @@ size_t priv_narwal_thermal_zones_strip_line_jump(char *ptr, char replacement)
  *
 */
 
-int priv_narwal_thermal_zones_get_next(NarwalThermalZone *tz_p, unsigned int opts)
+int priv_narwal_thermal_zones_fill_next(NarwalThermalZone *tz_p, unsigned int opts)
 {
   struct dirent *dir_p = NULL;
   size_t path_len = 0;
@@ -182,7 +182,7 @@ float narwal_thermal_zones_get_temp(NarwalThermalZone *tz_p)
 /*
  * Get a specific thermal zone identified by type
 */
-int narwal_thermal_zones_get_by_type(NarwalThermalZone *tz_p, const char *type_p){
+int narwal_thermal_zones_fill_by_type(NarwalThermalZone *tz_p, const char *type_p){
   int rc;
   char *type_rs;
 
@@ -190,7 +190,7 @@ int narwal_thermal_zones_get_by_type(NarwalThermalZone *tz_p, const char *type_p
     rewinddir(d_p);
   }
   
-  while ((rc = priv_narwal_thermal_zones_get_next(tz_p, 0)) == NARWAL_THERMAL_ZONE_SUCESS){
+  while ((rc = priv_narwal_thermal_zones_fill_next(tz_p, 0)) == NARWAL_THERMAL_ZONE_SUCESS){
     type_rs = narwal_thermal_zones_get_type(tz_p);
 
     if (type_rs ==  NULL)

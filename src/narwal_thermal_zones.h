@@ -25,10 +25,11 @@ typedef struct  {
 } NarwalThermalZone;
 
 //private functions
-int priv_narwal_thermal_zones_get_next(NarwalThermalZone *tz_p, unsigned int opts);
+int priv_narwal_thermal_zones_fill_next(NarwalThermalZone *tz_p, unsigned int opts);
 //end private functions
 
 char *narwal_thermal_zones_get_type(NarwalThermalZone *tz_p);
+
 float narwal_thermal_zones_get_temp(NarwalThermalZone *tz_p);
 
 /*
@@ -44,10 +45,10 @@ float narwal_thermal_zones_get_temp(NarwalThermalZone *tz_p);
  * @return A status code indicating whether a thermal zone was retrieved,
  *         whether the iteration has finished, or whether an error occurred.
 */
-#define narwal_thermal_zones_get_next(tz_p)  priv_narwal_thermal_zones_get_next((tz_p), 0)
+#define narwal_thermal_zones_fill_next(tz_p)  priv_narwal_thermal_zones_fill_next((tz_p), 0)
 
 
-int narwal_thermal_zones_get_by_type(NarwalThermalZone *tz_p, const char *type);
+int narwal_thermal_zones_fill_by_type(NarwalThermalZone *tz_p, const char *type);
 
 enum NARWAL_THERMAL_ZONE_RC {
   NARWAL_THERMAL_ZONE_ERR,

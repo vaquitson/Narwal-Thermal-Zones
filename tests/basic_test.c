@@ -10,7 +10,7 @@ int print_thermal_zones_info()
   char *type;
   float temp;
 
-  while (narwal_thermal_zones_get_next(&tz_p) == NARWAL_THERMAL_ZONE_SUCESS){
+  while (narwal_thermal_zones_fill_next(&tz_p) == NARWAL_THERMAL_ZONE_SUCESS){
     type = narwal_thermal_zones_get_type(&tz_p);
     if (type == NULL){
       printf("error: %s\n", strerror(tz_p.error));
@@ -25,7 +25,7 @@ int print_thermal_zones_info()
   }
 
   printf("\n\nsecond iter\n\n");
-  while (narwal_thermal_zones_get_next(&tz_p) == NARWAL_THERMAL_ZONE_SUCESS){
+  while (narwal_thermal_zones_fill_next(&tz_p) == NARWAL_THERMAL_ZONE_SUCESS){
     type = narwal_thermal_zones_get_type(&tz_p);
     if (type == NULL){
       printf("error: %s\n", strerror(tz_p.error));
@@ -43,7 +43,7 @@ int print_thermal_zones_info()
 
 int get_thermal_zone_by_type(){
   NarwalThermalZone tz = {0};
-  if (narwal_thermal_zones_get_by_type(&tz, "x86_pkg_temp") == NARWAL_THERMAL_ZONE_SUCESS){
+  if (narwal_thermal_zones_fill_by_type(&tz, "x86_pkg_temp") == NARWAL_THERMAL_ZONE_SUCESS){
     printf("path: %s\n", tz.path);
     printf("type: %s\n", narwal_thermal_zones_get_type(&tz));
     printf("temp: %f\n", narwal_thermal_zones_get_temp(&tz));   
@@ -52,8 +52,6 @@ int get_thermal_zone_by_type(){
     return -1;
   }
 }
-
-
 
 int main(void){
   print_thermal_zones_info();
