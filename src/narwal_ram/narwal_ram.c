@@ -3,11 +3,56 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdio.h>
-
+#include <string.h>
+#include <ctype.h>
+#include <stdlib.h>
+ 
 #include "narwal_ram.h"
 
 
 int meminfo_fd = -1;
+
+
+long int priv_narwal_ram_parse_line(char *str){
+  char buf[NARWAL_RAM_ENTRY_VALUE_MAX] = {0};
+  size_t i = 0;
+
+  while (*str != '\0' && *str != '\n'){
+    if (i > NARWAL_RAM_ENTRY_VALUE_MAX-1){
+      return NARWAL_RAM_TO_LARGE_ENTRY;
+    }
+
+    if (isdigit((unsigned char)*str)){
+      buf[i] = *str;
+      i++;
+    }
+    str++; 
+  }
+  buf[i] = '\0';
+
+  return strtol(buf, NULL, 10);
+}
+
+
+/*
+ *
+*/
+long int priv_narwal_ram_get_entry(char *str, char *key){
+  char *entry_p;
+  
+  if (str == NULL || key == NULL){
+    return NARWAL_READ_SIZE;
+  }
+
+
+  entry_p = strstr(str, key);
+  if (entry_p == NULL)
+    // key does not exist
+    return NARWAL_RAM_ARGUMENT_ERR; 
+
+  //printf("%s\n", entry_p);
+  return priv_narwal_ram_parse_line(entry_p);
+}
 
 
 int narwal_ram_usage(void){
@@ -29,6 +74,8 @@ int narwal_ram_usage(void){
   buf[data_read] = '\0'; 
 
   printf("Ram data: \n%s\n\n", buf);
-
+  
+  printf("cahced: %ld\n", priv_narwal_ram_get_entry(buf, "MemTotal"));
+  
   return 0; 
 }
