@@ -4,9 +4,10 @@
 
 int test_ram_basic();
 
-
 int main(void){
-  //printf("helo world \n");
-  narwal_ram_usage();
+  printf("Ram size: %ld\n", narwal_ram_size());
+  printf("Ram size: %ld\n", narwal_ram_size());
+  printf("Ram size: %ld\n", narwal_ram_size());
+  printf("Ram size: %ld\n", narwal_ram_size());
   return 0;
 }

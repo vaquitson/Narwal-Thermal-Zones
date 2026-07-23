@@ -4,7 +4,7 @@
 #define NARWAL_RAM_MEMINFO_PATH "/proc/meminfo"
 #define NARWAL_RAM_ENTRY_VALUE_MAX 15
 
-int narwal_ram_usage(void);
+long int narwal_ram_size(void);
 
 #define NARWAL_READ_SIZE 250
 #define NARWAL_RAM_OPEN_ERR       -1

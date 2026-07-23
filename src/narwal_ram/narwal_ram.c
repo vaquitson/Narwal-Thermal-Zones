@@ -34,16 +34,12 @@ long int priv_narwal_ram_parse_line(char *str){
 }
 
 
-/*
- *
-*/
 long int priv_narwal_ram_get_entry(char *str, char *key){
   char *entry_p;
   
   if (str == NULL || key == NULL){
     return NARWAL_READ_SIZE;
   }
-
 
   entry_p = strstr(str, key);
   if (entry_p == NULL)
@@ -55,27 +51,32 @@ long int priv_narwal_ram_get_entry(char *str, char *key){
 }
 
 
-int narwal_ram_usage(void){
-  int ram_usage;
-  char buf[NARWAL_READ_SIZE];
-  ssize_t data_read;
+long int narwal_ram_size(void){
+  static long int ram_size = 0;
+  
+  if (ram_size == 0){
+    long int rc;
+    char buf[NARWAL_READ_SIZE];
+    ssize_t data_read;
 
-  if (meminfo_fd < 0) {
-    meminfo_fd = open(NARWAL_RAM_MEMINFO_PATH, O_RDONLY);
     if (meminfo_fd < 0) {
-      return NARWAL_RAM_OPEN_ERR; 
+      meminfo_fd = open(NARWAL_RAM_MEMINFO_PATH, O_RDONLY);
+      if (meminfo_fd < 0) {
+        return NARWAL_RAM_OPEN_ERR; 
+      }
     }
+
+    data_read = read(meminfo_fd, buf, NARWAL_READ_SIZE-1);
+    if (data_read < 0)
+      return NARWAL_RAM_READ_ERR;
+    buf[data_read] = '\0';
+
+    ram_size = priv_narwal_ram_get_entry(buf, "MemTotal");
+    if (ram_size < 0){
+      rc = ram_size;
+      ram_size = 0;
+      return rc;
+    } 
   }
-  
-  data_read = read(meminfo_fd, buf, NARWAL_READ_SIZE-1);
-  if (data_read < 0)
-    return NARWAL_RAM_READ_ERR;
-
-  buf[data_read] = '\0'; 
-
-  printf("Ram data: \n%s\n\n", buf);
-  
-  printf("cahced: %ld\n", priv_narwal_ram_get_entry(buf, "MemTotal"));
-  
-  return 0; 
+  return ram_size;
 }
