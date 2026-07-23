@@ -20,4 +20,6 @@ MemSize_t narwal_ram_usage(void);
 #define NARWAL_RAM_NULL_BUF       -5
 #define NARWAL_RAM_SEEK_RESET_ERR -6
 
+
+
 #endif
